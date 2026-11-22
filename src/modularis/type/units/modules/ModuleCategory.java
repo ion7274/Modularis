@@ -11,6 +11,7 @@ public enum ModuleCategory{
     weapon("Weapon", Color.valueOf("ff7f7f")),
     ability("Ability", Color.valueOf("84f491")),
     active("Active", Color.valueOf("6cb8ff")),
+    pure("True", Color.valueOf("704193")),
 
     //cannon parts
     barrel("Barrels", Color.valueOf("ff9f6b")),

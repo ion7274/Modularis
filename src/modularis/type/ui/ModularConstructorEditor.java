@@ -260,7 +260,7 @@ public class ModularConstructorEditor extends BaseDialog{
         buttonRefs.clear();
         for(ModuleCategory cat : ModuleCategory.values()){
             Seq<ModuleType> inCat = (cannonMode ? MdlModules.cannonParts : MdlModules.all)
-                .select(m -> m.category == cat && !(m instanceof CannonPart c && c.unstable && !WorldTally.tuned()));
+                .select(m -> m.category == cat && WorldTally.open(m) && !(m instanceof CannonPart c && c.unstable && !WorldTally.tuned()));
             if(inCat.isEmpty()) continue;
 
             list.add(cat.title).color(cat.color).left().growX().padTop(8f).padLeft(4f).row();
@@ -282,7 +282,15 @@ public class ModularConstructorEditor extends BaseDialog{
 
     private Element moduleButton(ModuleType type){
         TextureRegionDrawable icon = new TextureRegionDrawable(type.region());
-        ImageButton button = new ImageButton(icon, Styles.clearNoneTogglei);
+        ImageButton button = new ImageButton(icon, Styles.clearNoneTogglei){
+            @Override
+            public void draw(){
+                if(type.category == ModuleCategory.pure){
+                    drift(x + width / 2f, y + height / 2f, width * 0.85f, height * 0.85f, parentAlpha);
+                }
+                super.draw();
+            }
+        };
         button.getImageCell().grow().pad(6f);
         button.clicked(() -> {
             selected = (selected == type ? null : type);
@@ -300,6 +308,20 @@ public class ModularConstructorEditor extends BaseDialog{
         });
         buttonRefs.add(new ModBtn(button, type));
         return button;
+    }
+
+    static void drift(float cx, float cy, float w, float h, float alpha){
+        Color tint = Tmp.c3.set(0x43296cff);
+        float r = Math.max(w, h) * 0.5f, t = Time.globalTime;
+        for(int i = 0; i < 14; i++){
+            float spin = (0.9f + i % 3 * 0.3f) * (i % 2 == 0 ? 1f : -0.7f);
+            float a = t * spin + i * 25.7f + Mathf.sin(t * 0.02f + i) * 25f;
+            float d = 0.95f + 0.25f * Mathf.sin(t * 0.031f + i * 1.7f);
+            float s = r * (0.45f + 0.2f * Mathf.sin(t * 0.047f + i * 2.3f));
+            float px = cx + Angles.trnsx(a, d * w * 0.5f), py = cy + Angles.trnsy(a, d * h * 0.5f);
+            Fill.light(px, py, 18, s, Tmp.c1.set(tint).lerp(Color.white, 0.12f).a(0.4f * alpha), Tmp.c2.set(tint).a(0f));
+        }
+        Draw.reset();
     }
 
     private void refreshInfo(){
@@ -802,7 +824,8 @@ public class ModularConstructorEditor extends BaseDialog{
                 float sx = screenX(m.x + m.type.w / 2f);
                 float sy = screenY(m.y + m.type.h / 2f);
                 float w = m.type.w * cp, h = m.type.h * cp;
-                
+                if(m.type.category == ModuleCategory.pure) drift(sx, sy, w, h, 1f);
+
                 m.type.drawBody(null, m, sx, sy, w, h, 0f);
                 m.type.drawPaint(null, m, sx, sy, w, h, 0f, paintOf(m));
             }

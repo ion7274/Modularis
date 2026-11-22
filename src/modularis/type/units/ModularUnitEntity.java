@@ -120,6 +120,13 @@ public class ModularUnitEntity extends TankUnit{
 
     public @Nullable ModularPhysics.Stats stats;
 
+    public void scored(){
+        ModularPhysics.Stats s = stats();
+        if(s == null || s.wardOnKill <= 0f) return;
+        apply(StatusEffects.invincible, s.wardOnKill * 60f);
+        healthMultiplier = Float.POSITIVE_INFINITY;
+    }
+
     public ModularPhysics.Stats stats(){
         if(stats == null && design != null) stats = ModularPhysics.compute(design);
         return stats;
@@ -282,6 +289,8 @@ public class ModularUnitEntity extends TankUnit{
         cargoMounts.clear();
         disposeMounts();
         mounts = new WeaponMount[0];
+        boolean shielded = Structs.contains(abilities, a -> a instanceof ForceFieldAbility);
+        float charge = shield;
         abilities = new Ability[0];
         if(design == null) return;
 
@@ -290,6 +299,7 @@ public class ModularUnitEntity extends TankUnit{
         Seq<WeaponMount> weaponMounts = new Seq<>();
         FloatSeq kicks = new FloatSeq();
         Seq<Ability> abils = new Seq<>();
+        ForceFieldAbility field = null;
 
         for(PlacedModule m : design.modules){
             if(!design.isActive(m)) continue;
@@ -312,8 +322,16 @@ public class ModularUnitEntity extends TankUnit{
             }else if(m.type instanceof ModulPulsar p){
                 pulsars.add(new PulsarMount(m, p));
 
-                Ability shield = p.createShield();
-                if(shield != null) abils.add(shield);
+                if(p.hasShield()){
+                    if(field == null){
+                        field = (ForceFieldAbility)p.createShield();
+                    }else{
+                        field.max += p.shieldMax;
+                        field.regen += p.shieldRegen;
+                        field.radius = Math.max(field.radius, p.shieldRadius);
+                        field.cooldown = Math.min(field.cooldown, p.shieldCooldown);
+                    }
+                }
             }else if(m.type instanceof ModulDrill d){
                 drills.add(new DrillMount(m, d));
             }else if(m.type instanceof ModulActive a){
@@ -362,11 +380,13 @@ public class ModularUnitEntity extends TankUnit{
         for(int i = 0; i < mounts.length; i++) lastShots[i] = mounts[i].totalShots;
         recoilScales = kicks.toArray();
 
+        if(field != null) abils.add(field);
         abilities = abils.toArray(Ability.class);
         for(Ability a : abilities){
             if(type != null) a.init(type);
             a.created(this);
         }
+        if(shielded && field != null) shield = Math.min(charge, field.max);
 
         recomputeDerived();
     }
@@ -967,7 +987,9 @@ public class ModularUnitEntity extends TankUnit{
 
             float hx = x + Tmp.v2.x * reach, hy = y + Tmp.v2.y * reach;
             if(!net.client()){
+                boolean alive = !other.dead();
                 other.damage(damage);
+                if(alive && (other.dead() || other.health <= 0f)) scored();
                 damage(damage / (rammed ? s.ramMultiplier : 1f) * (rammed ? s.ramSelfShare : 1f)
                     * ModularImpact.ramSelfDamage * Mathf.clamp(other.mass() / Math.max(mass(), 1f), 0f, 1f));
             }

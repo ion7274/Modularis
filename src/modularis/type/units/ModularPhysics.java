@@ -131,6 +131,7 @@ public class ModularPhysics{
             //modules whose multipliers happen to be interesting. They all stack.
             s.healthMultiplier *= t.healthMultiplier;
             s.damageMultiplier *= t.damageMultiplier;
+            s.wardOnKill = Math.max(s.wardOnKill, t.wardOnKill);
             s.reloadMultiplier *= t.reloadMultiplier;
             s.speedMod *= t.speedMultiplier;
             weightMult *= t.weightMultiplier;
@@ -460,6 +461,7 @@ public class ModularPhysics{
         public float reloadMultiplier = 1f;
         /** Extra top-speed multiplier, folded into {@link #speedRating}. */
         public float speedMod = 1f;
+        public float wardOnKill;
 
         //---- C4 (kamikaze) ----
         /** Number of C4 charges aboard. Any at all makes the machine a kamikaze. */

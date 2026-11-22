@@ -41,7 +41,7 @@ public class ModularDesign{
 
     /** True if another module of this type may be added at all (count limit + free slots). */
     public boolean canAdd(ModuleType type){
-        if(atLimit(type)) return false;
+        if(atLimit(type) || !WorldTally.open(type)) return false;
         if(type.slot != SlotType.none && type.slotCost > slotsFree(type.slot)) return false;
         return true;
     }
@@ -154,7 +154,7 @@ public class ModularDesign{
         ModularDesign out = new ModularDesign();
         out.color.set(raw.color);
         for(PlacedModule m : raw.modules){
-            if(MdlModules.cannonParts.contains(m.type) || out.atLimit(m.type) || overlapsAny(out, m)){
+            if(MdlModules.cannonParts.contains(m.type) || out.atLimit(m.type) || !WorldTally.open(m.type) || overlapsAny(out, m)){
                 dropped[0]++;
                 continue;
             }

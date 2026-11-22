@@ -39,7 +39,13 @@ public class MdlMod extends Mod{
         Events.run(Trigger.update, ActiveInteraction::update);
         Events.run(Trigger.update, ModularPathfinder::update);
         Events.run(Trigger.update, ModularUnitEntity::pushLocalUnit);
-        Events.on(WorldLoadEvent.class, event -> ModularPathfinder.reset());
+        Events.on(WorldLoadEvent.class, event -> {
+            ModularPathfinder.reset();
+            WorldTally.greet();
+        });
+        Events.on(UnitBulletDestroyEvent.class, event -> {
+            if(!net.client() && event.bullet != null && event.bullet.owner instanceof ModularUnitEntity e) e.scored();
+        });
         Events.on(TileChangeEvent.class, event -> {
             if(!world.isGenerating()) ModularPathfinder.tileChanged(event.tile);
         });
@@ -49,6 +55,7 @@ public class MdlMod extends Mod{
         });
         ActiveInteraction.load();
         Events.on(ServerLoadEvent.class, event -> {
+            netServer.addPacketHandler(WorldTally.packet, WorldTally::heard);
             netServer.addPacketHandler(CargoInteraction.packetName, CargoInteraction::handle);
             netServer.addPacketHandler(TowInteraction.packetName, TowInteraction::handle);
             netServer.addPacketHandler(ActiveInteraction.packetName, ActiveInteraction::handle);
@@ -59,6 +66,7 @@ public class MdlMod extends Mod{
             ActiveInteraction.installHud();
             netClient.addPacketHandler(MapFlow.packet, MapFlow::received);
             Events.run(Trigger.update, MapFlow::watch);
+            netServer.addPacketHandler(WorldTally.packet, WorldTally::heard);
             netServer.addPacketHandler(CargoInteraction.packetName, CargoInteraction::handle);
             netServer.addPacketHandler(TowInteraction.packetName, TowInteraction::handle);
             netServer.addPacketHandler(ActiveInteraction.packetName, ActiveInteraction::handle);

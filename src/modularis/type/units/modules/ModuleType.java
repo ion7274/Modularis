@@ -62,6 +62,8 @@ public class ModuleType{
     public float powerUseMultiplier = 1f;
     /** Scales the drivetrain's hauling capacity. */
     public float haulMultiplier = 1f;
+    /** Seconds the machine can't be hurt after it kills a unit. */
+    public float wardOnKill = 0f;
     /** Cargo capacity of the machine. */
     public int cargoCapacity = 0;
 
@@ -163,6 +165,15 @@ public class ModuleType{
     }
 
     public void display(Table table){
+        if(!WorldTally.open(this)){
+            table.label(() -> CannonPart.smear(localizedName, 0.2f, 4)).color(category.color).left().row();
+            table.label(() -> CannonPart.smear(description, 0.12f, 5)).color(mindustry.graphics.Pal.lightishGray).left().wrap().width(220f).row();
+            table.image().color(mindustry.graphics.Pal.gray).height(2f).growX().pad(4f).row();
+            stat(table, "Size", w + "x" + h);
+            stat(table, "Weight", Strings.autoFixed(weight, 1));
+            table.label(() -> CannonPart.smear("Role: ????????????????????????", 0.3f, 6)).color(mindustry.graphics.Pal.lightishGray).left().row();
+            return;
+        }
         table.add(localizedName).color(category.color).left().row();
         if(!description.isEmpty()){
             table.add(description).color(mindustry.graphics.Pal.lightishGray).left().wrap().width(220f).row();
@@ -196,6 +207,7 @@ public class ModuleType{
         mult(table, "Power output", powerProductionMultiplier, false);
         mult(table, "Power draw", powerUseMultiplier, true);
         mult(table, "Haul capacity", haulMultiplier, false);
+        if(wardOnKill > 0) stat(table, "On kill", "[lime]invulnerable for " + Strings.autoFixed(wardOnKill, 1) + "s[]");
 
         buildStats(table);
     }

@@ -57,7 +57,7 @@ public class ModularConstructor extends UnitBlock{
             }).size(220f, 50f).row();
 
             table.button("Create Machine", Icon.add, () -> configure(Boolean.TRUE))
-                .size(220f, 50f).disabled(b -> design.isEmpty());
+                .size(220f, 50f).disabled(b -> design.isEmpty() || !WorldTally.open(design));
         }
 
         @Override
@@ -70,7 +70,7 @@ public class ModularConstructor extends UnitBlock{
             if(value instanceof String s){
                 design = ModularDesign.read(s);
             }else if(value instanceof Boolean){
-                if(!net.client()) createMachine();
+                if(!net.client() && WorldTally.open(design, builder)) createMachine();
             }
         }
 

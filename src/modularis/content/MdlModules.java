@@ -34,7 +34,7 @@ public class MdlModules{
         gun, discharger, cannon, sanguis, laculum, haberBosch, flamethrower, artillery, pierceCannon, wolfRae, interfector,
         ram, harpoon, pointDefence, antiBallistic, buildTower, repairTower, airborne, minelayer,
         // abilities
-        mender, pulsus, turboHeater, overclocker, compressor, reactiveArmorer, transformator, reformator,c4, shieldEmitter, jetEngine, drill, tow,
+        mender, pulsus, turboHeater, overclocker, compressor, reactiveArmorer, transformator, reformator,c4, shieldEmitter, jetEngine, drill, tow, cauldron,
         // active
         dash,
         // cannon hinges
@@ -980,8 +980,8 @@ public class MdlModules{
             hasPulseEffect = false;
 
             shieldRadius = 60f;
-            shieldRegen = 0.4f;
-            shieldMax = 500f;
+            shieldRegen = 0.6f;
+            shieldMax = 1200f;
             shieldCooldown = 60f * 6f;
         }});
 
@@ -1066,6 +1066,22 @@ public class MdlModules{
             weight = 2f;
             health = 40f;
             healthMultiplier = 0.5f;
+        }});
+
+        cauldron = add(new ModuleType("sacrificial-cauldron2x2"){{
+            localizedName = "Sacrificial Cauldron";
+            description = "Burns the machine's own frame to feed its guns. Every kill buys it a moment of grace.";
+            category = ModuleCategory.pure;
+            slot = SlotType.ability;
+            slotCost = 1;
+            limit = 1;
+            w = 2; h = 2;
+            healthMultiplier = 0.1f;
+            damageMultiplier = 5f;
+            wardOnKill = 1f;
+            weight = 3f;
+            health = 160f;
+            powerUse = 2f;
         }});
 
         turboHeater = add(new ModuleType("turboheater2x2"){{

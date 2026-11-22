@@ -12,6 +12,7 @@ import mindustry.ai.*;
 import mindustry.ai.types.*;
 import mindustry.content.*;
 import mindustry.entities.*;
+import mindustry.entities.abilities.*;
 import mindustry.entities.bullet.*;
 import mindustry.entities.units.*;
 import mindustry.gen.*;
@@ -282,6 +283,11 @@ public class ModularUnitType extends UnitType{
 
         Draw.z(Layer.groundUnit + 0.03f);
         drawCargoItems(unit, cell, cx, cy);
+
+        for(Ability a : unit.abilities){
+            Draw.reset();
+            a.draw(unit);
+        }
 
         Draw.reset();
     }
